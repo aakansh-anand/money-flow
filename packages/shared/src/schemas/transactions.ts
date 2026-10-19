@@ -43,6 +43,7 @@ export const createTransactionInputSchema = z.discriminatedUnion("type", [
     type: z.literal("transfer"),
     fromAccountId: idSchema,
     toAccountId: idSchema,
+    amount: paiseSchema,
     note: z.string().max(500).optional(),
     occurredAt: isoDateTimeSchema,
   }),
@@ -66,7 +67,7 @@ export const transactionQuerySchema = z.object({
   from: isoDateTimeSchema.optional(),
   to: isoDateTimeSchema.optional(),
   cursor: idSchema.optional(),
-  limit: z.number().int().min(1).max(100).default(50),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
 });
 export type TransactionQuery = z.infer<typeof transactionQuerySchema>;
 

@@ -3,6 +3,7 @@ import {
   Body,
   Injectable,
   Optional,
+  Query,
   type PipeTransform,
   type Type,
 } from "@nestjs/common";
@@ -16,6 +17,11 @@ export function ZodBody(schema: ZodType): ParameterDecorator {
   return Body(new ZodValidationPipe(schema));
 }
 
+/** `@ZodQuery(schema)` — validates query strings against a shared Zod schema. */
+export function ZodQuery(schema: ZodType): ParameterDecorator {
+  return Query(new ZodValidationPipe(schema));
+}
+
 /**
  * Registered as global `APP_PIPE`. Validates parameter pipes constructed with
  * a schema, and any future DTO class carrying a static `zodSchema`.
@@ -26,8 +32,7 @@ export class ZodValidationPipe implements PipeTransform {
 
   transform(value: unknown, metadata: ArgumentMetadata): unknown {
     const schema =
-      this.explicitSchema ??
-      (metadata.metatype as ZodBodyClass | undefined)?.zodSchema;
+      this.explicitSchema ?? (metadata.metatype as ZodBodyClass | undefined)?.zodSchema;
     if (!schema) return value;
 
     const result = schema.safeParse(value);

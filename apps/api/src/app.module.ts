@@ -4,6 +4,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { LoggerModule } from "nestjs-pino";
 
 import { AuthModule } from "./auth/auth.module";
+import { FinanceModule } from "./finance/finance.module";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { GlobalExceptionFilter } from "./common/http-exception.filter";
 import { ZodValidationPipe } from "./common/zod-validation.pipe";
@@ -16,23 +17,16 @@ import { DatabaseModule } from "./database/database.module";
     EnvModule,
     DatabaseModule,
     AuthModule,
+    FinanceModule,
     LoggerModule.forRootAsync({
       inject: [ENV],
       useFactory: (env: Env) => ({
         pinoHttp: {
           level:
             env.LOG_LEVEL ??
-            (env.NODE_ENV === "production"
-              ? "info"
-              : env.NODE_ENV === "test"
-                ? "silent"
-                : "debug"),
+            (env.NODE_ENV === "production" ? "info" : env.NODE_ENV === "test" ? "silent" : "debug"),
           // Never log credentials — inbound or outbound.
-          redact: [
-            "req.headers.authorization",
-            "req.headers.cookie",
-            'res.headers["set-cookie"]',
-          ],
+          redact: ["req.headers.authorization", "req.headers.cookie", 'res.headers["set-cookie"]'],
           transport:
             env.NODE_ENV === "production" || env.NODE_ENV === "test"
               ? undefined

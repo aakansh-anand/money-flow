@@ -65,10 +65,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       return;
     }
 
-    this.logger.error(
-      { err: exception, path: req.url },
-      "Unhandled error",
-    );
+    this.logger.error({ err: exception, path: req.url }, "Unhandled error");
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       ...base,
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,

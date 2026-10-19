@@ -98,8 +98,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthTokens> {
     const rawToken =
-      body.refreshToken ??
-      (res.req.cookies?.[REFRESH_COOKIE_NAME] as string | undefined);
+      body.refreshToken ?? (res.req.cookies?.[REFRESH_COOKIE_NAME] as string | undefined);
     if (!rawToken) {
       throw new UnauthorizedException("Missing refresh token");
     }

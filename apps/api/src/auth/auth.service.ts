@@ -26,10 +26,7 @@ interface IssuedSession {
 /** Valid-format bcrypt hash used for timing-safe failed logins. */
 let dummyHash: string | undefined;
 async function getDummyHash(): Promise<string> {
-  dummyHash ??= await bcrypt.hash(
-    randomBytes(16).toString("hex"),
-    BCRYPT_ROUNDS,
-  );
+  dummyHash ??= await bcrypt.hash(randomBytes(16).toString("hex"), BCRYPT_ROUNDS);
   return dummyHash;
 }
 
@@ -123,9 +120,7 @@ export class AuthService {
         { sessionId: session.id, userId: session.userId },
         "Refresh token reuse detected — session revoked",
       );
-      throw new UnauthorizedException(
-        "Refresh token reuse detected — session revoked",
-      );
+      throw new UnauthorizedException("Refresh token reuse detected — session revoked");
     }
 
     const rotated = await this.rotateSession(session.id, userAgent);
@@ -163,11 +158,7 @@ export class AuthService {
       .update(sessions)
       .set({ revokedAt: new Date() })
       .where(
-        and(
-          eq(sessions.id, sessionId),
-          eq(sessions.userId, userId),
-          isNull(sessions.revokedAt),
-        ),
+        and(eq(sessions.id, sessionId), eq(sessions.userId, userId), isNull(sessions.revokedAt)),
       )
       .returning({ id: sessions.id });
     if (revoked.length === 0) {

@@ -4,11 +4,7 @@ import { z } from "zod";
  * All money in Kosh is integer paise (1 rupee = 100 paise).
  * Never floats — floating point has no place near currency.
  */
-export const paiseSchema = z
-  .number()
-  .int()
-  .positive()
-  .max(Number.MAX_SAFE_INTEGER);
+export const paiseSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 
 /** Convert rupees (e.g. 1299.50) to paise (129950). Rounds to nearest paise. */
 export function toPaise(rupees: number): number {

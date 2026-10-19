@@ -20,9 +20,7 @@ export class CsrfGuard implements CanActivate {
     const req = ctx.switchToHttp().getRequest<Request>();
     const hasRefreshCookie = Boolean(req.cookies?.[REFRESH_COOKIE_NAME]);
     if (hasRefreshCookie && req.headers["x-kosh-csrf"] !== "1") {
-      throw new ForbiddenException(
-        "Missing x-kosh-csrf header on cookie-authed request",
-      );
+      throw new ForbiddenException("Missing x-kosh-csrf header on cookie-authed request");
     }
     return true;
   }

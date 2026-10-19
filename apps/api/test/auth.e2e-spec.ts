@@ -15,8 +15,7 @@ import { AppModule } from "@/app.module";
  * Runs against the LOCAL Docker Postgres only — wipes users/sessions.
  * Refuses to touch anything that doesn't look like localhost.
  */
-const databaseUrl =
-  process.env.DATABASE_URL ?? "postgres://kosh:kosh@localhost:5436/kosh";
+const databaseUrl = process.env.DATABASE_URL ?? "postgres://kosh:kosh@localhost:5436/kosh";
 if (!databaseUrl.includes("localhost") && !databaseUrl.includes("127.0.0.1")) {
   throw new Error(`Refusing to run e2e against non-local DB: ${databaseUrl}`);
 }
@@ -75,9 +74,7 @@ describe("Auth (e2e)", () => {
       expect(res.body.accessToken).toEqual(expect.any(String));
       expect(res.body.refreshToken).toEqual(expect.any(String));
       expect(res.body.expiresIn).toBe(900);
-      const setCookie = res.headers["set-cookie"] as unknown as
-        | string[]
-        | undefined;
+      const setCookie = res.headers["set-cookie"] as unknown as string[] | undefined;
       expect(refreshCookie(setCookie)).toBe(res.body.refreshToken);
     });
 
@@ -110,9 +107,7 @@ describe("Auth (e2e)", () => {
 
   describe("error shape", () => {
     it("401 without token carries the consistent JSON body", async () => {
-      const res = await request(app.getHttpServer())
-        .get("/auth/sessions")
-        .expect(401);
+      const res = await request(app.getHttpServer()).get("/auth/sessions").expect(401);
       expect(res.body).toMatchObject({
         statusCode: 401,
         message: "Missing access token",
@@ -122,9 +117,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("404 on unknown routes uses the same shape", async () => {
-      const res = await request(app.getHttpServer())
-        .get("/definitely-not-a-route")
-        .expect(404);
+      const res = await request(app.getHttpServer()).get("/definitely-not-a-route").expect(404);
       expect(res.body).toMatchObject({
         statusCode: 404,
         path: "/definitely-not-a-route",
@@ -161,9 +154,7 @@ describe("Auth (e2e)", () => {
         .expect(200);
 
       expect(res.body.length).toBeGreaterThanOrEqual(2);
-      const current = res.body.find(
-        (s: { current: boolean }) => s.current,
-      );
+      const current = res.body.find((s: { current: boolean }) => s.current);
       expect(current.deviceLabel).toBe("sessions-test");
     });
 
@@ -181,9 +172,7 @@ describe("Auth (e2e)", () => {
         .get("/auth/sessions")
         .set("Authorization", `Bearer ${first.body.accessToken}`)
         .expect(200);
-      const target = list.body.find(
-        (s: { deviceLabel: string }) => s.deviceLabel === "revoke-me",
-      );
+      const target = list.body.find((s: { deviceLabel: string }) => s.deviceLabel === "revoke-me");
 
       await request(app.getHttpServer())
         .delete(`/auth/sessions/${target.id}`)
@@ -247,10 +236,7 @@ describe("Auth (e2e)", () => {
         .expect(200);
       const cookie = `kosh_refresh=${login.body.refreshToken}`;
 
-      await request(app.getHttpServer())
-        .post("/auth/refresh")
-        .set("Cookie", cookie)
-        .expect(403);
+      await request(app.getHttpServer()).post("/auth/refresh").set("Cookie", cookie).expect(403);
 
       await request(app.getHttpServer())
         .post("/auth/refresh")

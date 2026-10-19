@@ -1,11 +1,4 @@
-import {
-  bigint,
-  index,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { bigint, index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./auth.js";
 import { investmentTxnTypeEnum } from "./enums.js";
 
@@ -22,12 +15,8 @@ export const investmentTypes = pgTable(
      * The invested total is NOT stored — it's computed on read as
      * SUM(invest) - SUM(withdraw) over this type's transactions.
      */
-    currentValue: bigint("current_value", { mode: "number" })
-      .notNull()
-      .default(0),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    currentValue: bigint("current_value", { mode: "number" }).notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("investment_types_user_id_idx").on(t.userId)],
 );
@@ -47,9 +36,7 @@ export const investmentTransactions = pgTable(
     amount: bigint("amount", { mode: "number" }).notNull(),
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
     note: text("note"),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     index("investment_transactions_user_id_idx").on(t.userId),

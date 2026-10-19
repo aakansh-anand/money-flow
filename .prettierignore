@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Builds & caches
+dist/
+.next/
+.expo/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# Lockfiles — huge diffs, not hand-edited
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Env secrets (never touch)
+.env
+.env.*
+!.env.example
+
+# Drizzle-kit generated metadata (tool-owned JSON)
+packages/db/drizzle/meta/
+
+# Git / IDE
+.git/
+.cursor/
+
+# Misc binary or vendored
+*.min.js

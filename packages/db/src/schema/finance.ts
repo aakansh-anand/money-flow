@@ -1,17 +1,16 @@
+import { sql } from "drizzle-orm";
 import {
   bigint,
   index,
+  integer,
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { users } from "./auth.js";
-import {
-  accountTypeEnum,
-  tagKindEnum,
-  transactionTypeEnum,
-} from "./enums.js";
+import { accountTypeEnum, tagKindEnum, transactionTypeEnum } from "./enums.js";
 
 /** All money columns are integer paise (bigint, mode: "number"). Never floats. */
 export const accounts = pgTable(
@@ -28,16 +27,10 @@ export const accounts = pgTable(
      */
     subtype: text("subtype"),
     name: text("name").notNull(),
-    openingBalance: bigint("opening_balance", { mode: "number" })
-      .notNull()
-      .default(0),
+    openingBalance: bigint("opening_balance", { mode: "number" }).notNull().default(0),
     /** Maintained by the API inside a DB transaction on every write. */
-    currentBalance: bigint("current_balance", { mode: "number" })
-      .notNull()
-      .default(0),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    currentBalance: bigint("current_balance", { mode: "number" }).notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("accounts_user_id_idx").on(t.userId)],
 );
@@ -52,11 +45,15 @@ export const tags = pgTable(
     name: text("name").notNull(),
     kind: tagKindEnum("kind").notNull(),
     color: text("color").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    /** User-defined list order (0 = top). Default follows createdAt until reordered. */
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("tags_user_id_idx").on(t.userId)],
+  (t) => [
+    index("tags_user_id_idx").on(t.userId),
+    index("tags_user_sort_order_idx").on(t.userId, t.sortOrder),
+    uniqueIndex("tags_user_name_lower_idx").on(t.userId, sql`lower(${t.name})`),
+  ],
 );
 
 export const transactions = pgTable(
@@ -76,9 +73,7 @@ export const transactions = pgTable(
     amount: bigint("amount", { mode: "number" }).notNull(),
     note: text("note"),
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     index("transactions_user_id_idx").on(t.userId),

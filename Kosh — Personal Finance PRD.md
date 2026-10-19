@@ -54,10 +54,10 @@ Mobile and web both authenticate directly against NestJS, which issues its own a
 
 | Table                  | Purpose                                                           | Key fields                                                                                                         |
 | ---------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| users                  | Account credentials                                               | id, email, passwordHash, createdAt                                                                                 |
+| users                  | Account credentials                                               | id, email, passwordHash, tagSortMode (automatic \| manual), createdAt                                              |
 | sessions               | One row per active device/session                                 | id, userId, tokenHash, deviceLabel, userAgent, lastUsedAt, createdAt, expiresAt, revokedAt                         |
 | accounts               | Cash + bank accounts                                              | id, userId, type (cash/bank), subtype (free-text label, banks only), name, openingBalance, currentBalance          |
-| tags                   | Expense/income categories, user-defined                           | id, userId, name, kind (expense/income), color                                                                     |
+| tags                   | Expense/income categories, user-defined                           | id, userId, name, kind (expense/income), color, sortOrder (manual list position)                                   |
 | transactions           | Every expense/income/transfer                                     | id, userId, type (expense/income/transfer), accountId, fromAccountId, toAccountId, tagId, amount, note, occurredAt |
 | investmentTypes        | User-defined investment categories (FD, Stocks, Gold, Bitcoin, …) | id, userId, name, currentValue                                                                                     |
 | investmentTransactions | Every invest/withdraw event against a category                    | id, userId, investmentTypeId, instrumentName, type (invest/withdraw), amount, occurredAt, note                     |
@@ -71,6 +71,13 @@ Every table carries `userId` — v1 is multi-user (you plus friends with their o
 
 **Sessions:** one `sessions` row per logged-in device. The access JWT carries `sub` + `sid` (session id), so the profile screen can list all active sessions, flag the current one, and revoke any other.
 
+**Tags:** names are unique per user, compared case-insensitively (`Meals` and `MEALS` cannot coexist). Each user chooses how tag lists are ordered in Settings:
+
+- **Automatic (default)** — `GET /tags` returns tags sorted by how often they appear on expense/income transactions (most used first). Tags with no transactions yet, or tied counts, fall back to creation order (`createdAt`), so a new user's list reads Meals → Snacks → Clothes in the order they were added.
+- **Manual** — the user drag-and-drops tags on the tags settings screen and taps **Save**; the API persists `sortOrder` on each tag. That order is kept on every `GET /tags` until they change it again. Saving a manual order or calling `PUT /tags/order` switches the user to manual mode. Switching back to automatic recomputes order from live transaction counts on each read (no stale frequency cache).
+
+The preference lives on `users.tagSortMode`. Pickers (Add Expense/Income), the tags settings page, and any tag dropdown all use the same `GET /tags` ordering.
+
 ## API Routes
 
 | Resource                | Routes                                                                                                                                                                                |
@@ -78,7 +85,7 @@ Every table carries `userId` — v1 is multi-user (you plus friends with their o
 | Auth                    | `POST /auth/register` · `POST /auth/login` · `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/sessions` · `DELETE /auth/sessions/:id`                                          |
 | Accounts                | `GET /accounts` · `POST /accounts` · `PATCH /accounts/:id`                                                                                                                            |
 | Transactions            | `GET /transactions?accountId&tagId&from&to` · `POST /transactions` (type: expense/income/transfer) · `PATCH /transactions/:id` · `DELETE /transactions/:id`                           |
-| Tags                    | `GET /tags` · `POST /tags` · `PATCH /tags/:id`                                                                                                                                        |
+| Tags                    | `GET /tags` · `GET /tags/preferences` · `PATCH /tags/preferences` · `PUT /tags/order` · `POST /tags` · `PATCH /tags/:id`                                                              |
 | Investment Types        | `GET /investment-types` · `POST /investment-types` · `PATCH /investment-types/:id` (update `currentValue`)                                                                            |
 | Investment Transactions | `GET /investment-transactions?investmentTypeId` · `POST /investment-transactions` (type: invest/withdraw)                                                                             |
 | Contacts                | `GET /contacts` · `POST /contacts`                                                                                                                                                    |
@@ -122,6 +129,10 @@ A dashboard of your own categories (FD, Stocks, Gold, …), each showing its run
 ### Debt Balance
 
 Dashboard with **Add Debt** (you owe someone) and **Add Credit** (someone owes you) — amount + contact name + optional due date. “See statement” opens a table: Name · Remaining balance · **Record a payment**. Each debt opens a detail view: original amount and date taken, full repayment history (date, amount, note), and the remaining balance. Recording a payment subtracts from the balance; when it reaches zero the debt auto-completes and moves to a Completed view, history intact. Open debts can be edited or deleted.
+
+### Settings — Tags
+
+Dedicated tags page: create and edit tags (name, kind, color). **Tag list order** control with two modes — **Automatic** (sort by transaction frequency; default for new users) and **Manual** (drag-and-drop, then **Save** to persist). Mode and manual order sync via `GET/PATCH /tags/preferences` and `PUT /tags/order`. Tag pickers elsewhere reflect the same order as this list.
 
 ### Settings — Sessions
 

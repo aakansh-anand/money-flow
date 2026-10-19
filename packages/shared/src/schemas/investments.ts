@@ -48,4 +48,6 @@ export const createInvestmentTransactionInputSchema = z.object({
   occurredAt: isoDateTimeSchema,
   note: z.string().max(500).optional(),
 });
-export type CreateInvestmentTransactionInput = z.infer<typeof createInvestmentTransactionInputSchema>;
+export type CreateInvestmentTransactionInput = z.infer<
+  typeof createInvestmentTransactionInputSchema
+>;
