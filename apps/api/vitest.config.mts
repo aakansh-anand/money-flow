@@ -21,5 +21,7 @@ export default defineConfig({
     include: ["test/**/*.e2e-spec.ts"],
     testTimeout: 60_000,
     hookTimeout: 60_000,
+    // Auth + finance suites both wipe local Postgres — parallel runs deadlock.
+    fileParallelism: false,
   },
 });

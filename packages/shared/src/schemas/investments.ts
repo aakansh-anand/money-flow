@@ -51,3 +51,9 @@ export const createInvestmentTransactionInputSchema = z.object({
 export type CreateInvestmentTransactionInput = z.infer<
   typeof createInvestmentTransactionInputSchema
 >;
+
+/** Query params for GET /investment-transactions. */
+export const investmentTransactionQuerySchema = z.object({
+  investmentTypeId: idSchema.optional(),
+});
+export type InvestmentTransactionQuery = z.infer<typeof investmentTransactionQuerySchema>;

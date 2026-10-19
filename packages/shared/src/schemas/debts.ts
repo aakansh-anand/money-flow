@@ -77,3 +77,9 @@ export const createDebtPaymentInputSchema = z.object({
   note: z.string().max(500).optional(),
 });
 export type CreateDebtPaymentInput = z.infer<typeof createDebtPaymentInputSchema>;
+
+/** Query params for GET /debts. */
+export const debtListQuerySchema = z.object({
+  status: debtStatusSchema.optional(),
+});
+export type DebtListQuery = z.infer<typeof debtListQuerySchema>;
