@@ -9,7 +9,6 @@ import {
   type Session,
 } from "@kosh/shared";
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -26,7 +25,7 @@ import {
 import { Throttle } from "@nestjs/throttler";
 import type { Response } from "express";
 
-import { ZodValidationPipe } from "@/common/zod-validation.pipe";
+import { ZodBody } from "@/common/zod-validation.pipe";
 import { ENV, type Env } from "@/config/env";
 import { REFRESH_COOKIE_NAME } from "./auth.constants";
 import { AuthService } from "./auth.service";
@@ -50,7 +49,7 @@ export class AuthController {
   @Throttle(AUTH_THROTTLE)
   @Post("register")
   async register(
-    @Body(new ZodValidationPipe(registerInputSchema)) body: RegisterInput,
+    @ZodBody(registerInputSchema) body: RegisterInput,
     @Headers("user-agent") userAgent: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthTokens> {
@@ -69,7 +68,7 @@ export class AuthController {
   @HttpCode(200)
   @Post("login")
   async login(
-    @Body(new ZodValidationPipe(loginInputSchema)) body: LoginInput,
+    @ZodBody(loginInputSchema) body: LoginInput,
     @Headers("user-agent") userAgent: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthTokens> {
@@ -93,7 +92,7 @@ export class AuthController {
   @Post("refresh")
   async refresh(
     // `.default({})`: cookie-authed clients POST with no body at all.
-    @Body(new ZodValidationPipe(refreshInputSchema.partial().default({})))
+    @ZodBody(refreshInputSchema.partial().default({}))
     body: Partial<RefreshInput>,
     @Headers("user-agent") userAgent: string | undefined,
     @Res({ passthrough: true }) res: Response,

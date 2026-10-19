@@ -1,20 +1,36 @@
 import {
   BadRequestException,
+  Body,
   Injectable,
+  Optional,
   type PipeTransform,
+  type Type,
 } from "@nestjs/common";
+import type { ArgumentMetadata } from "@nestjs/common/interfaces/features/pipe-transform.interface";
 import { z, type ZodType } from "zod";
 
+type ZodBodyClass = Type<unknown> & { readonly zodSchema: ZodType };
+
+/** `@ZodBody(schema)` — shorthand for `@Body(new ZodValidationPipe(schema))`. */
+export function ZodBody(schema: ZodType): ParameterDecorator {
+  return Body(new ZodValidationPipe(schema));
+}
+
 /**
- * Parameter-level pipe validating a body against a shared Zod schema.
- * Usage: `@Body(new ZodValidationPipe(registerInputSchema)) body: RegisterInput`
+ * Registered as global `APP_PIPE`. Validates parameter pipes constructed with
+ * a schema, and any future DTO class carrying a static `zodSchema`.
  */
 @Injectable()
 export class ZodValidationPipe implements PipeTransform {
-  constructor(private readonly schema: ZodType) {}
+  constructor(@Optional() private readonly explicitSchema?: ZodType) {}
 
-  transform(value: unknown): unknown {
-    const result = this.schema.safeParse(value);
+  transform(value: unknown, metadata: ArgumentMetadata): unknown {
+    const schema =
+      this.explicitSchema ??
+      (metadata.metatype as ZodBodyClass | undefined)?.zodSchema;
+    if (!schema) return value;
+
+    const result = schema.safeParse(value);
     if (!result.success) {
       throw new BadRequestException({
         message: "Validation failed",
