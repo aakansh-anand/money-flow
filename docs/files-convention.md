@@ -13,29 +13,35 @@
 ## Standard Folder Structure
 
 ```md
-src/
+apps/web/
 ├── app/                      # Next.js App Router (routes only)
 │   ├── layout.tsx            # Root layout shell & providers
-│   ├── page.tsx              # Route page (Server Component by default)
+│   ├── page.tsx              # Route page (Server Component — thin wrapper)
 │   └── globals.css           # Global CSS styles & theme tokens
+│
+├── features/                 # Feature modules (primary home for product UI)
+│   └── <feature>/
+│       ├── components/       # Client screens, forms, feature UI
+│       ├── hooks/            # Feature hooks (useXxx)
+│       ├── services.ts       # RTK Query re-exports for this feature
+│       └── index.ts          # Public feature API
 │
 ├── components/
 │   ├── ui/                   # Reusable UI primitives (Button, Card, Input, ...)
-│   ├── motion/               # Reusable animation islands
-│   └── <feature>/            # Feature-grouped components
+│   └── motion/               # Reusable animation islands
 │
-├── hooks/                    # Custom React hooks (useXxx)
+├── hooks/                    # Cross-feature hooks only (prefer feature/hooks/)
 │
 ├── lib/                      # Framework-agnostic helpers & utilities
 │   └── utils.ts              # Styling helpers (cn)
 │
-├── store/                    # Redux Toolkit & RTK Query
+├── redux/                    # Redux Toolkit & RTK Query
 │   ├── index.ts              # Store configuration
 │   ├── hooks.ts              # Typed useAppSelector / useAppDispatch
 │   ├── api/                  # RTK Query API endpoints
 │   └── slices/               # Global client state slices
 │
-└── types/                    # Shared TypeScript interfaces & types
+└── types/                    # Shared TypeScript interfaces & types (if not in @kosh/shared)
 ```
 
 ---
@@ -62,13 +68,13 @@ Use **named exports** for components to enforce consistent import naming, preser
 
 | File            | Purpose                                      |
 | --------------- | -------------------------------------------- |
-| `page.tsx`      | Route page (**Server Component**)            |
+| `page.tsx`      | Route page (**Server Component** — import `*Screen` from `@/features/...`) |
 | `layout.tsx`    | Shared shell & providers for a route segment |
 | `loading.tsx`   | Suspense fallback UI for loading state       |
 | `error.tsx`     | Error boundary UI (`"use client"`)           |
 | `not-found.tsx` | 404 page UI                                  |
 
-Feature-specific components belong in `src/components/<feature>/`, keeping `src/app` strictly for route files.
+Feature UI belongs in `features/<feature>/` (components, hooks, `services.ts`, `index.ts`). Keep `app/` strictly for route files.
 
 ---
 
@@ -78,17 +84,18 @@ Root path aliases are configured in `tsconfig.json`:
 
 ```json
 "paths": {
-  "@/*": ["./src/*"]
+  "@/*": ["./*"]
 }
 ```
 
 | Alias             | Resolves to         |
 | ----------------- | ------------------- |
-| `@/components`    | `src/components`    |
-| `@/components/ui` | `src/components/ui` |
-| `@/lib`           | `src/lib`           |
-| `@/hooks`         | `src/hooks`         |
-| `@/store`         | `src/store`         |
+| `@/components`    | `components`        |
+| `@/components/ui` | `components/ui`     |
+| `@/features`      | `features`          |
+| `@/lib`           | `lib`               |
+| `@/hooks`         | `hooks`             |
+| `@/redux`         | `redux`             |
 
 Always import using `@/*` aliases — never relative paths (`../../`).
 
@@ -99,10 +106,12 @@ Always import using `@/*` aliases — never relative paths (`../../`).
 | Adding...                       | Location                                 |
 | ------------------------------- | ---------------------------------------- |
 | A reusable UI primitive         | `src/components/ui/`                     |
-| A feature-specific component    | `src/components/<feature>/`              |
-| Reusable animation wrapper      | `src/components/motion/`                 |
-| Stateful logic / hook           | `src/hooks/` (`useXxx`)                  |
-| Helper function / utility       | `src/lib/`                               |
-| Client global state             | `src/store/slices/`                      |
-| Backend API queries / mutations | `src/store/api/` or `src/redux-toolkit/` |
-| Shared TypeScript types         | `src/types/`                             |
+| A feature screen / form         | `features/<feature>/components/`         |
+| Feature hook                    | `features/<feature>/hooks/` (`useXxx`)   |
+| Feature RTK endpoints + hooks   | `features/<feature>/services.ts` (`injectEndpoints`) |
+| Reusable animation wrapper      | `components/motion/`                     |
+| Cross-feature hook              | `hooks/` (`useXxx`)                      |
+| Helper function / utility       | `lib/`                                   |
+| Client global state             | `redux/slices/`                          |
+| RTK base API + store wiring     | `redux/` (`base-api.ts`, `register-endpoints.ts`) |
+| Shared TypeScript types         | `@kosh/shared` or `types/`               |
