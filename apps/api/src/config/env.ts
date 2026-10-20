@@ -11,7 +11,7 @@ const envSchema = z.object({
   REFRESH_TOKEN_TTL: z.coerce.number().int().positive().default(2_592_000),
   /** Comma-separated origin allowlist for credentialed CORS. */
   CORS_ORIGINS: z.string().default("http://localhost:3000"),
-  /** pino level. Defaults: debug in dev, info in prod, silent in test. */
+  /** pino level. Defaults: warn in dev (quieter boot), info in prod, silent in test. */
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).optional(),
 });
 

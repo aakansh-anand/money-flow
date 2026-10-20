@@ -7,7 +7,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --ui=tui",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
@@ -19,13 +19,5 @@
     "prettier": "^3.9.10",
     "turbo": "^2.11.9",
     "typescript": "~5.9.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@parcel/watcher",
-      "bcrypt",
-      "esbuild",
-      "unrs-resolver"
-    ]
   }
 }

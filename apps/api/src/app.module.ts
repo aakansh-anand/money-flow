@@ -26,7 +26,8 @@ import { DatabaseModule } from "./database/database.module";
         pinoHttp: {
           level:
             env.LOG_LEVEL ??
-            (env.NODE_ENV === "production" ? "info" : env.NODE_ENV === "test" ? "silent" : "debug"),
+            (env.NODE_ENV === "production" ? "info" : env.NODE_ENV === "test" ? "silent" : "warn"),
+          autoLogging: env.NODE_ENV === "production",
           // Never log credentials — inbound or outbound.
           redact: ["req.headers.authorization", "req.headers.cookie", 'res.headers["set-cookie"]'],
           transport:
