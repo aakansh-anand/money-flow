@@ -1,5 +1,6 @@
 "use client";
 
+import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { ModeToggle } from "@/theme/mode-toggle";
 
@@ -9,16 +10,12 @@ type ThemeShellProps = {
 
 export function ThemeShell({ children }: ThemeShellProps) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
+    <ThemeProvider defaultTheme="system" disableTransitionOnChange>
       <div className="fixed top-4 right-4 z-50">
         <ModeToggle />
       </div>
       {children}
+      <Toaster richColors closeButton position="top-center" />
     </ThemeProvider>
   );
 }

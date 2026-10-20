@@ -1,37 +1,54 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Figtree, Merriweather } from "next/font/google";
+import { Figtree, Merriweather } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
+import { ReduxProvider } from "@/providers/redux-provider";
 import { ThemeShell } from "@/theme/theme-shell";
 import { cn } from "@/lib/utils";
+import { themeBlockingScript } from "@/lib/theme-blocking-script";
 
-const merriweatherHeading = Merriweather({subsets:['latin'],variable:'--font-heading'});
-
-const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const merriweatherHeading = Merriweather({
   subsets: ["latin"],
+  variable: "--font-heading",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const figtree = Figtree({
   subsets: ["latin"],
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
   title: "Kosh - Manage Finance",
-  description: "Kosh helps you effortlessly track expenses, set budgets, and gain insights into your personal or business finances with a simple, intuitive interface.",
+  description:
+    "Kosh helps you effortlessly track expenses, set budgets, and gain insights into your personal or business finances with a simple, intuitive interface.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", figtree.variable, merriweatherHeading.variable)}
+      className={cn(
+        "h-full",
+        "antialiased",
+        "font-sans",
+        figtree.variable,
+        merriweatherHeading.variable
+      )}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBlockingScript }} />
+      </head>
       <body className="min-h-full">
-        <ThemeShell>{children}</ThemeShell>
+        <Suspense fallback={<ThemeShell>{children}</ThemeShell>}>
+          <ReduxProvider>
+            <ThemeShell>{children}</ThemeShell>
+          </ReduxProvider>
+        </Suspense>
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from "next-themes";
+import { useTheme } from "@/providers/theme-provider";
 import { useCallback, useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
 
