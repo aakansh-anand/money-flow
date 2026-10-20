@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Figtree, Merriweather } from "next/font/google";
 import "./globals.css";
+import { ThemeShell } from "@/theme/theme-shell";
 import { cn } from "@/lib/utils";
 
 const merriweatherHeading = Merriweather({subsets:['latin'],variable:'--font-heading'});
@@ -26,9 +27,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", figtree.variable, merriweatherHeading.variable)}
     >
-      <body>{children}</body>
+      <body className="min-h-full">
+        <ThemeShell>{children}</ThemeShell>
+      </body>
     </html>
   );
 }

@@ -128,3 +128,60 @@
     @apply font-sans;
   }
 }
+
+/* Theme switch — View Transition API (clip-path slide) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  display: block;
+  background-color: var(--background);
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+  animation: theme-slide-down 0.6s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+@keyframes theme-slide-down {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.dark::view-transition-new(root) {
+  animation: theme-slide-down 0.6s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+html.switching-theme {
+  overflow: hidden !important;
+}
+
+html.switching-theme
+  *:not([data-theme-toggle]):not([data-theme-toggle] *),
+html.switching-theme
+  *:not([data-theme-toggle]):not([data-theme-toggle] *)::before,
+html.switching-theme
+  *:not([data-theme-toggle]):not([data-theme-toggle] *)::after {
+  transition: none !important;
+  animation-duration: 0s !important;
+}
+
+::view-transition-group(mode-toggle) {
+  z-index: 10000;
+  animation: none;
+}
+
+::view-transition-old(mode-toggle),
+::view-transition-new(mode-toggle) {
+  animation: none;
+  mix-blend-mode: normal;
+  transform: none;
+}
