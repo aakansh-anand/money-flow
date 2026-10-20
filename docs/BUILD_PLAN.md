@@ -2,7 +2,7 @@
 
 Execution checklist for the monorepo. Product behavior and API contracts live in [Kosh — PRD.md](./Kosh%20%E2%80%94%20PRD.md) (tech stack table, schema, routes, screens).
 
-**Progress (repo):** Phases 2–7 done on the API; Phase 1 partial (`apps/web`, `apps/mobile` not scaffolded yet); Phases 8–10 not started.
+**Progress (repo):** Phases 2–7 done on the API; Phase 1 partial (`apps/mobile` not scaffolded); Phase 8 web client in progress; Phases 9–10 pending.
 
 ## Overview
 
@@ -31,18 +31,18 @@ flowchart LR
 
 ## Phases
 
-| Phase | Focus | Status |
-| ----- | ----- | ------ |
-| 1 | Monorepo scaffold | **Partial** — api + packages exist; web/mobile apps not created |
-| 2 | `packages/shared` | **Done** |
-| 3 | `packages/db` + local Postgres | **Done** |
-| 4 | API: auth | **Done** |
-| 5 | API: core domain | **Done** |
-| 6 | API: investments & debts | **Done** |
-| 7 | API: reports | **Done** |
-| 8 | Web client | Pending |
-| 9 | Mobile client | Pending |
-| 10 | Deploy | Pending |
+| Phase | Focus                          | Status                                                       |
+| ----- | ------------------------------ | ------------------------------------------------------------ |
+| 1     | Monorepo scaffold              | **Partial** — api + packages + web exist; mobile not created |
+| 2     | `packages/shared`              | **Done**                                                     |
+| 3     | `packages/db` + local Postgres | **Done**                                                     |
+| 4     | API: auth                      | **Done**                                                     |
+| 5     | API: core domain               | **Done**                                                     |
+| 6     | API: investments & debts       | **Done**                                                     |
+| 7     | API: reports                   | **Done**                                                     |
+| 8     | Web client                     | **In progress**                                              |
+| 9     | Mobile client                  | Pending                                                      |
+| 10    | Deploy                         | Pending                                                      |
 
 ### Phase 1 — Monorepo scaffold
 
