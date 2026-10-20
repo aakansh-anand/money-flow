@@ -5,6 +5,7 @@ import { LoggerModule } from "nestjs-pino";
 
 import { AuthModule } from "./auth/auth.module";
 import { FinanceModule } from "./finance/finance.module";
+import { ReportsModule } from "./reports/reports.module";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { GlobalExceptionFilter } from "./common/http-exception.filter";
 import { ZodValidationPipe } from "./common/zod-validation.pipe";
@@ -18,6 +19,7 @@ import { DatabaseModule } from "./database/database.module";
     DatabaseModule,
     AuthModule,
     FinanceModule,
+    ReportsModule,
     LoggerModule.forRootAsync({
       inject: [ENV],
       useFactory: (env: Env) => ({

@@ -8,14 +8,14 @@ Kosh consolidates cash, two bank accounts (Paytm/Kotak), and Groww investments i
 
 v1 replaces the end-of-month Excel reconciliation: every rupee moved through Cash, Bank 1, or Bank 2 is logged once, tagged, and rolled up automatically.
 
-**In scope (v1)**
+In scope (v1)
 
 - Log expense/income against Cash, Bank 1, or Bank 2, each tagged (Meal, Snacks, Entertainment, Medical, Financial Service, Clothing, etc.)
 - Track who owes you and who you owe, per person, with partial repayments and a settled/open status
 - Record investments (Groww, RD/FD, Mutual Funds) and see total invested + current value
 - Auto-generate the monthly breakdown: expense/income by category, net position per account, and outstanding debt summary
 
-**Out of scope (v1)**
+Out of scope (v1)
 
 - Automatic bank/SMS/UPI statement import — manual entry only
 - Household/shared tracking in v1 — the app **is** multi-user (friends register their own accounts, each sees only their own data), but partner sharing and expense splitting are v2 (see Post-v1 Scope)
