@@ -1,5 +1,4 @@
 export * from "./money.js";
-export * from "./client.js";
 export * from "./schemas/common.js";
 export * from "./schemas/auth.js";
 export * from "./schemas/accounts.js";

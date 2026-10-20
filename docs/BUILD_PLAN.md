@@ -2,7 +2,7 @@
 
 Execution checklist for the monorepo. Product behavior and API contracts live in [Kosh — PRD.md](./Kosh%20%E2%80%94%20PRD.md) (tech stack table, schema, routes, screens).
 
-**Progress (repo):** Phases 2–7 done on the API; Phase 1 partial (`apps/mobile` not scaffolded); Phase 8 web client in progress; Phases 9–10 pending.
+**Progress (repo):** Phases 2–7 done on the API; Phase 1 partial (`apps/mobile` not scaffolded); Phase 8 web wiped (not started); Phases 9–10 pending.
 
 ## Overview
 
@@ -40,7 +40,7 @@ flowchart LR
 | 5     | API: core domain               | **Done**                                                     |
 | 6     | API: investments & debts       | **Done**                                                     |
 | 7     | API: reports                   | **Done**                                                     |
-| 8     | Web client                     | **In progress**                                              |
+| 8     | Web client                     | **Not started** — `apps/web` wiped; rebuild pending |
 | 9     | Mobile client                  | Pending                                                      |
 | 10    | Deploy                         | Pending                                                      |
 
