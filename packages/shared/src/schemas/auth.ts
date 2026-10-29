@@ -25,8 +25,8 @@ export const registerInputSchema = z
 export type RegisterInput = z.infer<typeof registerInputSchema>;
 
 export const loginInputSchema = z.object({
-  email: z.email(),
-  password: z.string().min(1),
+  email: z.email({ message: "Enter a valid email" }),
+  password: z.string().min(1, { message: "Enter your password" }),
   deviceLabel: z.string().min(1).max(120).optional(),
 });
 export type LoginInput = z.infer<typeof loginInputSchema>;
