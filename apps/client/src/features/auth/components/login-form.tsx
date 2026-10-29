@@ -10,8 +10,6 @@ import { formShakeVariant, formStaggerContainer, tapScale } from "@/utils/animat
 import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useState } from "react";
 
-import { registerPasswordGuide } from "@kosh/shared";
-
 import { useLoginForm } from "../hooks/use-login-form";
 import { mapLoginApiError } from "../lib/login-api-error";
 
@@ -90,12 +88,9 @@ const LoginForm = () => {
           autoComplete="off"
           className="ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-input"
           aria-invalid={errors.password ? true : undefined}
-          aria-describedby={errors.password ? "password-error password-guide" : "password-guide"}
+          aria-describedby={errors.password ? "password-error" : undefined}
           {...register("password")}
         />
-        <p id="password-guide" className="text-sm text-muted-foreground">
-          {registerPasswordGuide}
-        </p>
       </AuthMotionItem>
 
       {errors.root ? (

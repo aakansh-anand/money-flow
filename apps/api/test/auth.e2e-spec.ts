@@ -26,11 +26,12 @@ process.env.JWT_ACCESS_TTL = "900";
 process.env.REFRESH_TOKEN_TTL = "2592000";
 
 const EMAIL = "kosh-e2e@example.com";
+const NAME = "E2E User";
 const PASSWORD = "KoshE2e99";
 
-function refreshCookie(setCookie: string[] | undefined): string {
-  const raw = setCookie?.find((c) => c.startsWith("kosh_refresh="));
-  if (!raw) throw new Error("kosh_refresh cookie not set");
+function cookieValue(setCookie: string[] | undefined, name: string): string {
+  const raw = setCookie?.find((c) => c.startsWith(`${name}=`));
+  if (!raw) throw new Error(`${name} cookie not set`);
   return raw.split(";")[0]!.split("=")[1]!;
 }
 
@@ -65,10 +66,11 @@ describe("Auth (e2e)", () => {
         .expect(400);
     });
 
-    it("registers and returns a token pair + refresh cookie", async () => {
+    it("registers and returns a token pair + auth cookies", async () => {
       const res = await request(app.getHttpServer())
         .post("/auth/register")
         .send({
+          name: NAME,
           email: EMAIL,
           password: PASSWORD,
           confirmPassword: PASSWORD,
@@ -80,13 +82,14 @@ describe("Auth (e2e)", () => {
       expect(res.body.refreshToken).toEqual(expect.any(String));
       expect(res.body.expiresIn).toBe(900);
       const setCookie = res.headers["set-cookie"] as unknown as string[] | undefined;
-      expect(refreshCookie(setCookie)).toBe(res.body.refreshToken);
+      expect(cookieValue(setCookie, "kosh_access")).toBe(res.body.accessToken);
+      expect(cookieValue(setCookie, "kosh_refresh")).toBe(res.body.refreshToken);
     });
 
     it("rejects duplicate registration", async () => {
       await request(app.getHttpServer())
         .post("/auth/register")
-        .send({ email: EMAIL, password: PASSWORD, confirmPassword: PASSWORD })
+        .send({ name: NAME, email: EMAIL, password: PASSWORD, confirmPassword: PASSWORD })
         .expect(409);
     });
 
@@ -106,7 +109,14 @@ describe("Auth (e2e)", () => {
         .post("/auth/login")
         .send({ email: EMAIL, password: PASSWORD, deviceLabel: "e2e-login" })
         .expect(200);
+      expect(res.body).toMatchObject({
+        statusCode: 200,
+        message: "Login successful",
+      });
       expect(res.body.accessToken).toEqual(expect.any(String));
+      const setCookie = res.headers["set-cookie"] as unknown as string[] | undefined;
+      expect(cookieValue(setCookie, "kosh_access")).toBe(res.body.accessToken);
+      expect(cookieValue(setCookie, "kosh_refresh")).toBe(res.body.refreshToken);
     });
   });
 
@@ -145,6 +155,41 @@ describe("Auth (e2e)", () => {
   describe("authenticated routes", () => {
     it("rejects requests without a token", async () => {
       await request(app.getHttpServer()).get("/auth/sessions").expect(401);
+    });
+
+    it("returns the signed-in user from the access cookie", async () => {
+      const login = await request(app.getHttpServer())
+        .post("/auth/login")
+        .send({ email: EMAIL, password: PASSWORD })
+        .expect(200);
+      const setCookie = login.headers["set-cookie"] as unknown as string[] | undefined;
+
+      const res = await request(app.getHttpServer())
+        .get("/auth/me")
+        .set("Cookie", `kosh_access=${cookieValue(setCookie, "kosh_access")}`)
+        .expect(200);
+
+      expect(res.body).toEqual({
+        id: expect.any(String),
+        name: NAME,
+        email: EMAIL,
+      });
+    });
+
+    it("also accepts Bearer for /auth/me (mobile / tests)", async () => {
+      const login = await request(app.getHttpServer())
+        .post("/auth/login")
+        .send({ email: EMAIL, password: PASSWORD })
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get("/auth/me")
+        .set("Authorization", `Bearer ${login.body.accessToken}`)
+        .expect(200);
+    });
+
+    it("rejects /auth/me without an access token", async () => {
+      await request(app.getHttpServer()).get("/auth/me").expect(401);
     });
 
     it("lists sessions and flags the current one", async () => {
@@ -248,6 +293,21 @@ describe("Auth (e2e)", () => {
         .set("Cookie", cookie)
         .set("x-kosh-csrf", "1")
         .expect(200);
+    });
+
+    it("rejects cookie logout without the CSRF header", async () => {
+      const login = await request(app.getHttpServer())
+        .post("/auth/login")
+        .send({ email: EMAIL, password: PASSWORD, deviceLabel: "csrf-logout" })
+        .expect(200);
+      const setCookie = login.headers["set-cookie"] as unknown as string[] | undefined;
+      const access = cookieValue(setCookie, "kosh_access");
+      const refresh = cookieValue(setCookie, "kosh_refresh");
+
+      await request(app.getHttpServer())
+        .post("/auth/logout")
+        .set("Cookie", `kosh_access=${access}; kosh_refresh=${refresh}`)
+        .expect(403);
     });
   });
 

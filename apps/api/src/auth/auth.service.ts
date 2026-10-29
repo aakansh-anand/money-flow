@@ -1,7 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 
 import { sessions, users, type Db } from "@kosh/db";
-import type { AuthTokens, Session } from "@kosh/shared";
+import type { AuthTokens, CurrentUser, Session } from "@kosh/shared";
 import {
   ConflictException,
   Inject,
@@ -43,6 +43,7 @@ export class AuthService {
   ) {}
 
   async register(
+    name: string,
     email: string,
     password: string,
     deviceLabel: string | undefined,
@@ -58,12 +59,23 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
     const [user] = await this.db
       .insert(users)
-      .values({ email, passwordHash })
+      .values({ name, email, passwordHash })
       .returning({ id: users.id });
     if (!user) throw new Error("Failed to create user");
 
     const session = await this.createSession(user.id, deviceLabel, userAgent);
     return { tokens: this.issueTokens(user.id, session), sessionId: session.sessionId };
+  }
+
+  async me(userId: string): Promise<CurrentUser> {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { id: true, name: true, email: true },
+    });
+    if (!user) {
+      throw new UnauthorizedException("Invalid or expired access token");
+    }
+    return user;
   }
 
   async login(

@@ -1,28 +1,25 @@
-import type { AuthTokens } from "@kosh/shared";
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+
+/** `unknown` until GET /auth/me finishes (after cookies / refresh). */
+export type AuthStatus = "unknown" | "authenticated" | "anonymous";
 
 export type AuthState = {
-  accessToken: string | null;
-  /** Seconds until access token expiry (from last token response). */
-  expiresIn: number | null;
+  status: AuthStatus;
 };
 
 const initialState: AuthState = {
-  accessToken: null,
-  expiresIn: null,
+  status: "unknown",
 };
 
 export const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setTokens(state, action: PayloadAction<AuthTokens>) {
-      state.accessToken = action.payload.accessToken;
-      state.expiresIn = action.payload.expiresIn;
+    setAuthenticated(state) {
+      state.status = "authenticated";
     },
     clear(state) {
-      state.accessToken = null;
-      state.expiresIn = null;
+      state.status = "anonymous";
     },
   },
 });

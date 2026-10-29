@@ -1,4 +1,4 @@
-import { isAxiosError } from "axios";
+import { readApiError } from "./read-api-error";
 
 export type LoginFieldError = {
   field: "root";
@@ -6,27 +6,20 @@ export type LoginFieldError = {
 };
 
 export function mapLoginApiError(error: unknown): LoginFieldError {
-  if (isAxiosError(error)) {
-    const status = error.response?.status;
-    const data = error.response?.data as { message?: string | string[] } | undefined;
-    const apiMessage = Array.isArray(data?.message) ? data.message[0] : data?.message;
+  const { status, message } = readApiError(error);
 
-    if (status === 401) {
-      return {
-        field: "root",
-        message:
-          typeof apiMessage === "string" && apiMessage.length > 0
-            ? apiMessage
-            : "Email or password is incorrect",
-      };
-    }
+  if (status === 401) {
+    return {
+      field: "root",
+      message: message ?? "Email or password is incorrect",
+    };
+  }
 
-    if (status === 429) {
-      return {
-        field: "root",
-        message: "Too many attempts. Try again in a minute.",
-      };
-    }
+  if (status === 429) {
+    return {
+      field: "root",
+      message: "Too many attempts. Try again in a minute.",
+    };
   }
 
   return {

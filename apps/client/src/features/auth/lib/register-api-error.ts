@@ -1,4 +1,4 @@
-import { isAxiosError } from "axios";
+import { readApiError } from "./read-api-error";
 
 export type RegisterFieldError = {
   field: "email" | "root";
@@ -6,20 +6,13 @@ export type RegisterFieldError = {
 };
 
 export function mapRegisterApiError(error: unknown): RegisterFieldError {
-  if (isAxiosError(error)) {
-    const status = error.response?.status;
-    const data = error.response?.data as { message?: string | string[] } | undefined;
-    const apiMessage = Array.isArray(data?.message) ? data.message[0] : data?.message;
+  const { status, message } = readApiError(error);
 
-    if (status === 409) {
-      return {
-        field: "email",
-        message:
-          typeof apiMessage === "string" && apiMessage.length > 0
-            ? apiMessage
-            : "An account with this email already exists",
-      };
-    }
+  if (status === 409) {
+    return {
+      field: "email",
+      message: message ?? "An account with this email already exists",
+    };
   }
 
   return {

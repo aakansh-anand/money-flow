@@ -6,20 +6,29 @@ import {
 } from "@nestjs/common";
 import type { Request } from "express";
 
-import { REFRESH_COOKIE_NAME } from "@/auth/auth.constants";
+import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME } from "@/auth/auth.constants";
+
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 /**
- * CSRF check for cookie-authed unsafe routes. The refresh cookie is
- * SameSite=None, so a cross-site form could ride it. Requiring a custom
- * header forces a CORS preflight, which the origin allowlist already
- * rejects for untrusted origins.
+ * CSRF check when an auth cookie is present on an unsafe method.
+ * SameSite=None (prod) can ride cross-site forms; a custom header forces a
+ * CORS preflight that untrusted origins fail.
+ *
+ * Bearer-only clients (no auth cookies) skip this — they are not cookie-authed.
  */
 @Injectable()
 export class CsrfGuard implements CanActivate {
   canActivate(ctx: ExecutionContext): boolean {
     const req = ctx.switchToHttp().getRequest<Request>();
-    const hasRefreshCookie = Boolean(req.cookies?.[REFRESH_COOKIE_NAME]);
-    if (hasRefreshCookie && req.headers["x-kosh-csrf"] !== "1") {
+    if (SAFE_METHODS.has(req.method.toUpperCase())) {
+      return true;
+    }
+
+    const hasAuthCookie = Boolean(
+      req.cookies?.[ACCESS_COOKIE_NAME] || req.cookies?.[REFRESH_COOKIE_NAME],
+    );
+    if (hasAuthCookie && req.headers["x-kosh-csrf"] !== "1") {
       throw new ForbiddenException("Missing x-kosh-csrf header on cookie-authed request");
     }
     return true;

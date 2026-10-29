@@ -1,6 +1,9 @@
 import {
   type AuthTokens,
+  type CurrentUser,
+  LOGIN_SUCCESS_MESSAGE,
   type LoginInput,
+  type LoginResponse,
   loginInputSchema,
   type RefreshInput,
   refreshInputSchema,
@@ -20,19 +23,22 @@ import {
   Post,
   Res,
   UnauthorizedException,
-  UseGuards,
 } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import type { Response } from "express";
 
 import { ZodBody } from "@/common/zod-validation.pipe";
 import { ENV, type Env } from "@/config/env";
-import { REFRESH_COOKIE_NAME } from "./auth.constants";
+import {
+  ACCESS_COOKIE_NAME,
+  ACCESS_COOKIE_PATH,
+  REFRESH_COOKIE_NAME,
+  REFRESH_COOKIE_PATH,
+} from "./auth.constants";
 import { AuthService } from "./auth.service";
 import type { AuthContext } from "./auth.types";
 import { CurrentAuth } from "./decorators/current-auth.decorator";
 import { Public } from "./decorators/public.decorator";
-import { CsrfGuard } from "./guards/csrf.guard";
 
 /** Credential brute-force ceiling: 5 attempts / minute on register + login. */
 const AUTH_THROTTLE = { default: { limit: 5, ttl: 60_000 } };
@@ -54,12 +60,13 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthTokens> {
     const { tokens } = await this.auth.register(
+      body.name,
       body.email,
       body.password,
       body.deviceLabel,
       userAgent,
     );
-    this.setRefreshCookie(res, tokens.refreshToken);
+    this.setAuthCookies(res, tokens);
     return tokens;
   }
 
@@ -71,15 +78,19 @@ export class AuthController {
     @ZodBody(loginInputSchema) body: LoginInput,
     @Headers("user-agent") userAgent: string | undefined,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<AuthTokens> {
+  ): Promise<LoginResponse> {
     const { tokens } = await this.auth.login(
       body.email,
       body.password,
       body.deviceLabel,
       userAgent,
     );
-    this.setRefreshCookie(res, tokens.refreshToken);
-    return tokens;
+    this.setAuthCookies(res, tokens);
+    return {
+      statusCode: 200,
+      message: LOGIN_SUCCESS_MESSAGE,
+      ...tokens,
+    };
   }
 
   /**
@@ -87,7 +98,6 @@ export class AuthController {
    * body (mobile). Rotates on every use; reuse revokes the session.
    */
   @Public()
-  @UseGuards(CsrfGuard)
   @HttpCode(200)
   @Post("refresh")
   async refresh(
@@ -103,11 +113,10 @@ export class AuthController {
       throw new UnauthorizedException("Missing refresh token");
     }
     const { tokens } = await this.auth.refresh(rawToken, userAgent);
-    this.setRefreshCookie(res, tokens.refreshToken);
+    this.setAuthCookies(res, tokens);
     return tokens;
   }
 
-  @UseGuards(CsrfGuard)
   @HttpCode(204)
   @Post("logout")
   async logout(
@@ -115,7 +124,13 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     await this.auth.logout(auth.sessionId);
-    res.clearCookie(REFRESH_COOKIE_NAME, { path: "/auth" });
+    this.clearAuthCookies(res);
+  }
+
+  /** Cookie or Bearer access token. 200 means the session is still valid. */
+  @Get("me")
+  me(@CurrentAuth() auth: AuthContext): Promise<CurrentUser> {
+    return this.auth.me(auth.userId);
   }
 
   @Get("sessions")
@@ -136,15 +151,37 @@ export class AuthController {
    * SameSite=None requires Secure, which browsers refuse on http://localhost
    * — so local dev falls back to Lax. Production gets the full
    * httpOnly+Secure+None cookie per the PRD.
+   *
+   * Body tokens remain for mobile / e2e Bearer clients.
    */
-  private setRefreshCookie(res: Response, token: string): void {
+  private setAuthCookies(res: Response, tokens: AuthTokens): void {
     const isProd = this.env.NODE_ENV === "production";
-    res.cookie(REFRESH_COOKIE_NAME, token, {
+    const cookieBase = {
       httpOnly: true,
       secure: isProd,
-      sameSite: isProd ? "none" : "lax",
-      path: "/auth",
+      sameSite: (isProd ? "none" : "lax") as "none" | "lax",
+    };
+
+    res.cookie(ACCESS_COOKIE_NAME, tokens.accessToken, {
+      ...cookieBase,
+      path: ACCESS_COOKIE_PATH,
+      maxAge: this.env.JWT_ACCESS_TTL * 1000,
+    });
+    res.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, {
+      ...cookieBase,
+      path: REFRESH_COOKIE_PATH,
       maxAge: this.env.REFRESH_TOKEN_TTL * 1000,
     });
+  }
+
+  private clearAuthCookies(res: Response): void {
+    const isProd = this.env.NODE_ENV === "production";
+    const cookieBase = {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: (isProd ? "none" : "lax") as "none" | "lax",
+    };
+    res.clearCookie(ACCESS_COOKIE_NAME, { ...cookieBase, path: ACCESS_COOKIE_PATH });
+    res.clearCookie(REFRESH_COOKIE_NAME, { ...cookieBase, path: REFRESH_COOKIE_PATH });
   }
 }

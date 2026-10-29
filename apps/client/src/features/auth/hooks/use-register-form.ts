@@ -1,22 +1,21 @@
 "use client";
 
-import { registerInputSchema, type AuthTokens, type RegisterInput } from "@kosh/shared";
+import { registerInputSchema, type RegisterInput } from "@kosh/shared";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 
-import { apiClient } from "@/redux/api-client";
-import { useAppDispatch } from "@/redux/hooks";
-import { authActions } from "@/redux/slices/auth-slice";
+import { useRegisterMutation } from "@/features/auth/services/auth-api";
 
 export function useRegisterForm() {
-  const dispatch = useAppDispatch();
   const router = useRouter();
+  const [registerUser] = useRegisterMutation();
 
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerInputSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -24,10 +23,9 @@ export function useRegisterForm() {
   });
 
   const submitRegistration = useCallback(async (values: RegisterInput) => {
-    const { data } = await apiClient.post<AuthTokens>("/auth/register", values);
-    dispatch(authActions.setTokens(data));
-    router.push("/");
-  }, [dispatch, router]);
+    await registerUser(values).unwrap();
+    router.replace("/");
+  }, [registerUser, router]);
 
   return {
     form,

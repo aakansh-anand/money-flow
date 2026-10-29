@@ -10,8 +10,6 @@ import { formShakeVariant, formStaggerContainer, tapScale } from "@/utils/animat
 import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useState } from "react";
 
-import { registerPasswordGuide } from "@kosh/shared";
-
 import { mapRegisterApiError } from "../lib/register-api-error";
 import { useRegisterForm } from "../hooks/use-register-form";
 
@@ -59,6 +57,25 @@ const RegisterForm = () => {
     >
       <AuthMotionItem className="flex flex-col gap-2">
         <AuthFieldLabel
+          htmlFor="name"
+          label="Name"
+          error={errors.name?.message}
+          errorId="name-error"
+        />
+        <Input
+          id="name"
+          type="text"
+          placeholder="e.g. Alex"
+          autoComplete="off"
+          aria-invalid={errors.name ? true : undefined}
+          aria-describedby={errors.name ? "name-error" : undefined}
+          className="ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-input"
+          {...register("name")}
+        />
+      </AuthMotionItem>
+
+      <AuthMotionItem className="flex flex-col gap-2">
+        <AuthFieldLabel
           htmlFor="email"
           label="Email"
           error={errors.email?.message}
@@ -89,12 +106,9 @@ const RegisterForm = () => {
           autoComplete="new-password"
           className="ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-input"
           aria-invalid={errors.password ? true : undefined}
-          aria-describedby={errors.password ? "password-error password-guide" : "password-guide"}
+          aria-describedby={errors.password ? "password-error" : undefined}
           {...register("password")}
         />
-        <p id="password-guide" className="text-sm text-muted-foreground">
-          {registerPasswordGuide}
-        </p>
       </AuthMotionItem>
 
       <AuthMotionItem className="flex flex-col gap-2">

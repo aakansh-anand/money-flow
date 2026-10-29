@@ -6,6 +6,7 @@ import { LoggerModule } from "nestjs-pino";
 import { AuthModule } from "./auth/auth.module";
 import { FinanceModule } from "./finance/finance.module";
 import { ReportsModule } from "./reports/reports.module";
+import { CsrfGuard } from "./auth/guards/csrf.guard";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { GlobalExceptionFilter } from "./common/http-exception.filter";
 import { ZodValidationPipe } from "./common/zod-validation.pipe";
@@ -46,6 +47,7 @@ import { DatabaseModule } from "./database/database.module";
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: CsrfGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_PIPE, useClass: ZodValidationPipe },
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },

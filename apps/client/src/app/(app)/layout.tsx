@@ -1,7 +1,9 @@
+import { AuthRequiredGuard } from "@/features/auth/components/auth-required-guard";
+
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <AuthRequiredGuard>{children}</AuthRequiredGuard>;
 }

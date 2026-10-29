@@ -9,14 +9,13 @@ import { Reflector } from "@nestjs/core";
 import { JwtService } from "@nestjs/jwt";
 import type { Request } from "express";
 
+import { ACCESS_COOKIE_NAME } from "@/auth/auth.constants";
 import type { AccessTokenPayload, AuthContext } from "@/auth/auth.types";
 import { IS_PUBLIC_KEY } from "@/auth/decorators/public.decorator";
 
 /**
- * Global guard: verifies the Bearer access JWT on every non-@Public route
- * and attaches `{ userId, sessionId }` to the request. The `userId` claim is
- * the entire data-isolation boundary between users — handlers scope all
- * queries by it.
+ * Global guard: verifies the access JWT from the httpOnly cookie (web) or
+ * `Authorization: Bearer` (mobile / tests) and attaches `{ userId, sessionId }`.
  */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -34,8 +33,7 @@ export class JwtAuthGuard implements CanActivate {
     if (isPublic) return true;
 
     const req = ctx.switchToHttp().getRequest<Request>();
-    const header = req.headers.authorization;
-    const token = header?.startsWith("Bearer ") ? header.slice("Bearer ".length) : undefined;
+    const token = readAccessToken(req);
     if (!token) {
       throw new UnauthorizedException("Missing access token");
     }
@@ -51,4 +49,16 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException("Invalid or expired access token");
     }
   }
+}
+
+function readAccessToken(req: Request): string | undefined {
+  const fromCookie = req.cookies?.[ACCESS_COOKIE_NAME];
+  if (typeof fromCookie === "string" && fromCookie.length > 0) {
+    return fromCookie;
+  }
+  const header = req.headers.authorization;
+  if (header?.startsWith("Bearer ")) {
+    return header.slice("Bearer ".length);
+  }
+  return undefined;
 }

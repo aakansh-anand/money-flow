@@ -12,6 +12,11 @@ const registerPasswordSchema = z
 
 export const registerInputSchema = z
   .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: "Enter your name" })
+      .max(80, { message: "Use at most 80 characters" }),
     email: z.email({ message: "Enter a valid email" }),
     password: registerPasswordSchema,
     confirmPassword: registerPasswordSchema,
@@ -43,6 +48,23 @@ export const authTokensSchema = z.object({
   expiresIn: z.number().int().positive(),
 });
 export type AuthTokens = z.infer<typeof authTokensSchema>;
+
+export const LOGIN_SUCCESS_MESSAGE = "Login successful";
+
+/** Login body: success message plus the token pair the client has to hold. */
+export const loginResponseSchema = authTokensSchema.extend({
+  statusCode: z.literal(200),
+  message: z.literal(LOGIN_SUCCESS_MESSAGE),
+});
+export type LoginResponse = z.infer<typeof loginResponseSchema>;
+
+/** Signed-in user. Returned by GET /auth/me. No tokens. */
+export const currentUserSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  email: z.email(),
+});
+export type CurrentUser = z.infer<typeof currentUserSchema>;
 
 export const sessionSchema = z.object({
   id: z.uuid(),

@@ -3,6 +3,7 @@ import { tagSortModeEnum } from "./enums.js";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   /** Tag list: automatic = by transaction frequency; manual = saved sortOrder. */
