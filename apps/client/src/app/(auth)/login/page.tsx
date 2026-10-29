@@ -1,10 +1,23 @@
+import {
+  AuthCardShell,
+  AuthMotionItem,
+  AuthPageFrame,
+} from "@/features/auth/components/auth-motion";
+
 const LoginPage = () => {
   return (
-    <main className="w-full max-w-sm text-center">
-      <h1 className="text-4xl font-semibold tracking-tight font-heading">
-        Sign in
-      </h1>
-    </main>
+    <AuthPageFrame>
+      <AuthCardShell>
+        <AuthMotionItem>
+          <h1 className="font-heading text-5xl font-semibold tracking-tight">Login to Kosh</h1>
+        </AuthMotionItem>
+        <AuthMotionItem>
+          <p className="text-base text-muted-foreground mt-3">
+            Enter your email below to login to Kosh
+          </p>
+        </AuthMotionItem>
+      </AuthCardShell>
+    </AuthPageFrame>
   );
 };
 

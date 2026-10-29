@@ -3,7 +3,7 @@ import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 
 export const E2E_EMAIL = "kosh-finance-e2e@example.com";
-export const E2E_PASSWORD = "correct-horse-battery-staple";
+export const E2E_PASSWORD = "KoshE2e99";
 
 export async function registerAndLogin(
   app: INestApplication,
@@ -12,7 +12,7 @@ export async function registerAndLogin(
 ): Promise<string> {
   await request(app.getHttpServer())
     .post("/auth/register")
-    .send({ email, password, deviceLabel: "finance-e2e" })
+    .send({ email, password, confirmPassword: password, deviceLabel: "finance-e2e" })
     .expect(201);
 
   const login = await request(app.getHttpServer())

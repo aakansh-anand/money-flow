@@ -26,7 +26,7 @@ process.env.JWT_ACCESS_TTL = "900";
 process.env.REFRESH_TOKEN_TTL = "2592000";
 
 const EMAIL = "kosh-e2e@example.com";
-const PASSWORD = "correct-horse-battery-staple";
+const PASSWORD = "KoshE2e99";
 
 function refreshCookie(setCookie: string[] | undefined): string {
   const raw = setCookie?.find((c) => c.startsWith("kosh_refresh="));
@@ -68,7 +68,12 @@ describe("Auth (e2e)", () => {
     it("registers and returns a token pair + refresh cookie", async () => {
       const res = await request(app.getHttpServer())
         .post("/auth/register")
-        .send({ email: EMAIL, password: PASSWORD, deviceLabel: "e2e" })
+        .send({
+          email: EMAIL,
+          password: PASSWORD,
+          confirmPassword: PASSWORD,
+          deviceLabel: "e2e",
+        })
         .expect(201);
 
       expect(res.body.accessToken).toEqual(expect.any(String));
@@ -81,7 +86,7 @@ describe("Auth (e2e)", () => {
     it("rejects duplicate registration", async () => {
       await request(app.getHttpServer())
         .post("/auth/register")
-        .send({ email: EMAIL, password: PASSWORD })
+        .send({ email: EMAIL, password: PASSWORD, confirmPassword: PASSWORD })
         .expect(409);
     });
 

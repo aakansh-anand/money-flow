@@ -1,11 +1,27 @@
 import { z } from "zod";
 
-export const registerInputSchema = z.object({
-  email: z.email(),
-  password: z.string().min(8).max(128),
-  /** Optional label so the sessions list can say "Pixel 8" instead of a raw UA. */
-  deviceLabel: z.string().min(1).max(120).optional(),
-});
+/** Register password: 6–12 chars, letters and numbers only (shared by client + API). */
+export const REGISTER_PASSWORD_REGEX = /^[a-zA-Z0-9]+$/;
+export const registerPasswordGuide = "6–12 characters, letters and numbers only";
+
+const registerPasswordSchema = z
+  .string()
+  .min(6, { message: "Use at least 6 characters" })
+  .max(12, { message: "Use at most 12 characters" })
+  .regex(REGISTER_PASSWORD_REGEX, { message: "Letters and numbers only" });
+
+export const registerInputSchema = z
+  .object({
+    email: z.email({ message: "Enter a valid email" }),
+    password: registerPasswordSchema,
+    confirmPassword: registerPasswordSchema,
+    /** Optional label so the sessions list can say "Pixel 8" instead of a raw UA. */
+    deviceLabel: z.string().min(1).max(120).optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Doesn't match your password",
+    path: ["confirmPassword"],
+  });
 export type RegisterInput = z.infer<typeof registerInputSchema>;
 
 export const loginInputSchema = z.object({

@@ -5,7 +5,6 @@ import "./globals.css";
 import { ReduxProvider } from "@/providers/redux-provider";
 import { ThemeShell } from "@/theme/theme-shell";
 import { cn } from "@/lib/utils";
-import { themeBlockingScript } from "@/lib/theme-blocking-script";
 
 const merriweatherHeading = Merriweather({
   subsets: ["latin"],
@@ -37,14 +36,17 @@ export default function RootLayout({
         "antialiased",
         "font-sans",
         figtree.variable,
-        merriweatherHeading.variable
+        merriweatherHeading.variable,
       )}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBlockingScript }} />
-      </head>
       <body className="min-h-full">
-        <Suspense fallback={<ThemeShell>{children}</ThemeShell>}>
+        <Suspense
+          fallback={
+            <ThemeShell>
+              <div className="flex min-h-screen items-center justify-center" aria-busy="true" />
+            </ThemeShell>
+          }
+        >
           <ReduxProvider>
             <ThemeShell>{children}</ThemeShell>
           </ReduxProvider>
