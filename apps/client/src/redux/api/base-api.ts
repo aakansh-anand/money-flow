@@ -40,6 +40,6 @@ export const baseApi = createApi({
    * `Auth` marks data that belongs to the signed-in user.
    * Login and register invalidate it. Logout drops the cache instead of refetching.
    */
-  tagTypes: ["Auth"],
+  tagTypes: ["Auth", "Profile"],
   endpoints: () => ({}),
 });

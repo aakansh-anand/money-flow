@@ -4,7 +4,8 @@ import { z } from "zod";
 export const REGISTER_PASSWORD_REGEX = /^[a-zA-Z0-9]+$/;
 export const registerPasswordGuide = "6–12 characters, letters and numbers only";
 
-const registerPasswordSchema = z
+/** Shared by register and change-password. */
+export const accountPasswordSchema = z
   .string()
   .min(6, { message: "Use at least 6 characters" })
   .max(12, { message: "Use at most 12 characters" })
@@ -18,8 +19,8 @@ export const registerInputSchema = z
       .min(1, { message: "Enter your name" })
       .max(80, { message: "Use at most 80 characters" }),
     email: z.email({ message: "Enter a valid email" }),
-    password: registerPasswordSchema,
-    confirmPassword: registerPasswordSchema,
+    password: accountPasswordSchema,
+    confirmPassword: accountPasswordSchema,
     /** Optional label so the sessions list can say "Pixel 8" instead of a raw UA. */
     deviceLabel: z.string().min(1).max(120).optional(),
   })

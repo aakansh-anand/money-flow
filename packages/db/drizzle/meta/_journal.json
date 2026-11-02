@@ -36,6 +36,20 @@
       "when": 1792275000000,
       "tag": "0004_user_name",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793279941806,
+      "tag": "0005_cold_dreadnoughts",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793281000000,
+      "tag": "0006_onboarding_status",
+      "breakpoints": true
     }
   ]
 }

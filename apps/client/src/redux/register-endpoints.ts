@@ -3,3 +3,4 @@
  * Import this module before the store serves any queries.
  */
 import "@/features/auth/services/auth-api";
+import "@/features/profile/services/profile-api";

@@ -1,6 +1,7 @@
 export * from "./money.js";
 export * from "./schemas/common.js";
 export * from "./schemas/auth.js";
+export * from "./schemas/profile.js";
 export * from "./schemas/accounts.js";
 export * from "./schemas/tags.js";
 export * from "./schemas/transactions.js";

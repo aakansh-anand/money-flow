@@ -5,6 +5,7 @@ import { LoggerModule } from "nestjs-pino";
 
 import { AuthModule } from "./auth/auth.module";
 import { FinanceModule } from "./finance/finance.module";
+import { ProfileModule } from "./profile/profile.module";
 import { ReportsModule } from "./reports/reports.module";
 import { CsrfGuard } from "./auth/guards/csrf.guard";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
@@ -19,6 +20,7 @@ import { DatabaseModule } from "./database/database.module";
     EnvModule,
     DatabaseModule,
     AuthModule,
+    ProfileModule,
     FinanceModule,
     ReportsModule,
     LoggerModule.forRootAsync({

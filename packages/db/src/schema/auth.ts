@@ -1,11 +1,15 @@
-import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { tagSortModeEnum } from "./enums.js";
+import { index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { onboardingStatusEnum, tagSortModeEnum } from "./enums.js";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
+  /** started = not finished; in-progress keeps onboardingStep; completed opens the dashboard. */
+  onboardingStatus: onboardingStatusEnum("onboarding_status").notNull().default("started"),
+  /** Set only while onboardingStatus is in-progress. */
+  onboardingStep: integer("onboarding_step"),
   /** Tag list: automatic = by transaction frequency; manual = saved sortOrder. */
   tagSortMode: tagSortModeEnum("tag_sort_mode").notNull().default("automatic"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

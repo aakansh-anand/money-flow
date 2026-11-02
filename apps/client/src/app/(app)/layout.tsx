@@ -1,3 +1,4 @@
+import { AppShell } from "@/components/app-shell/app-shell";
 import { AuthRequiredGuard } from "@/features/auth/components/auth-required-guard";
 
 export default function AppLayout({
@@ -5,5 +6,9 @@ export default function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AuthRequiredGuard>{children}</AuthRequiredGuard>;
+  return (
+    <AuthRequiredGuard>
+      <AppShell>{children}</AppShell>
+    </AuthRequiredGuard>
+  );
 }

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Figtree, Merriweather } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
-import { LogoutButton } from "@/features/auth/components/logout-button";
 import { ReduxProvider } from "@/providers/redux-provider";
 import { ThemeShell } from "@/theme/theme-shell";
 import { cn } from "@/lib/utils";
@@ -49,7 +48,7 @@ export default function RootLayout({
           }
         >
           <ReduxProvider>
-            <ThemeShell controls={<LogoutButton />}>{children}</ThemeShell>
+            <ThemeShell>{children}</ThemeShell>
           </ReduxProvider>
         </Suspense>
       </body>

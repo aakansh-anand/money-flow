@@ -8,3 +8,8 @@ export const investmentTxnTypeEnum = pgEnum("investment_txn_type", ["invest", "w
 export const contactTypeEnum = pgEnum("contact_type", ["person", "bank", "institution"]);
 export const debtDirectionEnum = pgEnum("debt_direction", ["lent", "borrowed"]);
 export const debtStatusEnum = pgEnum("debt_status", ["open", "settled"]);
+export const onboardingStatusEnum = pgEnum("onboarding_status", [
+  "started",
+  "in-progress",
+  "completed",
+]);

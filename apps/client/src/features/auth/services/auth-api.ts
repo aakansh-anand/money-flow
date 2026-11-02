@@ -52,7 +52,8 @@ export const authApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useLogoutMutation } = authApi;
+export const { useLoginMutation, useRegisterMutation, useLogoutMutation, useGetMeQuery } =
+  authApi;
 
 /** One check per page load. Strict Mode remounts effects. */
 let sessionRestoreStarted = false;
